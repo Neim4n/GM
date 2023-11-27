@@ -1,0 +1,284 @@
+<div class="gm-wrapper">
+    <div class="gm__canvas-container">
+        <canvas #canvasElement class="gm__canvas" height="1000" width="1000"></canvas>
+    </div>
+    <div class="gm__navigation-container">
+        <form class="gm__navigation">
+            <mat-form-field>
+                <mat-label>Laboratory Work</mat-label>
+                <select matNativeControl required [value]="numberLR" (change)="onChangeSelect($event)">
+                    <option value="1">LR1</option>
+                    <option value="2">LR2</option>
+                    <option value="3">LR3</option>
+                </select>
+            </mat-form-field>
+            <!--LR1-->
+            <ng-container *ngIf="+numberLR === 1">
+            <div class="gm__navigation-title">
+                Offset
+            </div>
+            <mat-form-field>
+                <mat-label>X</mat-label>
+                <input [(ngModel)]="offset.X" (ngModelChange)="changeInput()" matInput name="X_offset" type="number">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Y</mat-label>
+                <input [(ngModel)]="offset.Y" (ngModelChange)="changeInput()" matInput name="Y_offset" type="number">
+            </mat-form-field>
+            <div class="gm__navigation-title">
+                Rotation
+            </div>
+            <mat-form-field>
+                <mat-label>X</mat-label>
+                <input [(ngModel)]="pivot.X" (ngModelChange)="changeInput()" matInput name="X_pivot" type="number">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Y</mat-label>
+                <input [(ngModel)]="pivot.Y" (ngModelChange)="changeInput()" matInput name="Y_pivot" type="number">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>DEG</mat-label>
+                <input [(ngModel)]="pivot.DEG" (ngModelChange)="changeInput()" matInput name="DEG_pivot" type="number">
+            </mat-form-field>
+            <div class="gm__navigation-title">
+                Scale
+            </div>
+            <mat-form-field>
+                <mat-label>X</mat-label>
+                <input [(ngModel)]="scale.X" (ngModelChange)="changeInput()" matInput name="X_scale" type="number">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Y</mat-label>
+                <input [(ngModel)]="scale.Y" (ngModelChange)="changeInput()" matInput name="Y_scale" type="number">
+            </mat-form-field>
+            <div class="gm__navigation-title">
+                Symmetry
+            </div>
+            <mat-form-field>
+                <mat-label>X</mat-label>
+                <input [(ngModel)]="symmetry.X" (ngModelChange)="changeInput()" matInput name="X1_symmetry"
+                       type="number">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Y</mat-label>
+                <input [(ngModel)]="symmetry.Y" (ngModelChange)="changeInput()" matInput name="Y1_symmetry"
+                       type="number">
+            </mat-form-field>
+            <mat-radio-group class="gm__navigation-radio-group" [(ngModel)]="transformationMode" (ngModelChange)="changeInput()" name="transformation">
+                 <mat-radio-button class="example-margin" value="affine">Affine</mat-radio-button>
+                 <mat-radio-button class="example-margin" value="projective">Projective</mat-radio-button>
+             </mat-radio-group>
+            <ng-container *ngIf="transformationMode === 'affine'">
+                <div class="gm__navigation-title">
+                    Affine
+                </div>
+                <mat-form-field>
+                    <mat-label>Xx</mat-label>
+                    <input [(ngModel)]="affine.X.X" (ngModelChange)="changeInput()" matInput min="1" name="XX_affin"
+                           type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Xy</mat-label>
+                    <input [(ngModel)]="affine.X.Y" (ngModelChange)="changeInput()" matInput min="0" name="XY_affin"
+                           type="number">
+                </mat-form-field>
+                <span></span>
+                <mat-form-field>
+                    <mat-label>Yx</mat-label>
+                    <input [(ngModel)]="affine.Y.X" (ngModelChange)="changeInput()" matInput min="0" name="YX_affin"
+                           type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Yy</mat-label>
+                    <input [(ngModel)]="affine.Y.Y" (ngModelChange)="changeInput()" matInput min="1" name="YY_affin"
+                           type="number">
+                </mat-form-field>
+                <span></span>
+                <mat-form-field>
+                    <mat-label>Ox</mat-label>
+                    <input [(ngModel)]="affine.O.X" (ngModelChange)="changeInput()" matInput min="0" name="OX_affin"
+                           type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Oy</mat-label>
+                    <input [(ngModel)]="affine.O.Y" (ngModelChange)="changeInput()" matInput min="1" name="OY_affin"
+                           type="number">
+                </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="transformationMode === 'projective'">
+                <div class="gm__navigation-title">
+                    Projective
+                </div>
+                <mat-form-field>
+                    <mat-label>Xx</mat-label>
+                    <input [(ngModel)]="projective.X.X" (ngModelChange)="changeInput()" matInput min="1"
+                           name="XX_projective" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Xy</mat-label>
+                    <input [(ngModel)]="projective.X.Y" (ngModelChange)="changeInput()" matInput min="0"
+                           name="XY_projective" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>wX</mat-label>
+                    <input [(ngModel)]="projective.X.w" (ngModelChange)="changeInput()" matInput min="0"
+                           name="Xw_projective" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Yx</mat-label>
+                    <input [(ngModel)]="projective.Y.X" (ngModelChange)="changeInput()" matInput min="0"
+                           name="YX_projective" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Yy</mat-label>
+                    <input [(ngModel)]="projective.Y.Y" (ngModelChange)="changeInput()" matInput min="1"
+                           name="YY_projective" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>wY</mat-label>
+                    <input [(ngModel)]="projective.Y.w" (ngModelChange)="changeInput()" matInput min="1"
+                           name="Yw_projective" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Ox</mat-label>
+                    <input [(ngModel)]="projective.O.X" (ngModelChange)="changeInput()" matInput min="0"
+                           name="OX_projective" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Oy</mat-label>
+                    <input [(ngModel)]="projective.O.Y" (ngModelChange)="changeInput()" matInput min="1"
+                           name="OY_projective" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>wO</mat-label>
+                    <input [(ngModel)]="projective.O.w" (ngModelChange)="changeInput()" matInput min="1"
+                           name="Ow_projective" type="number">
+                </mat-form-field>
+            </ng-container>
+            </ng-container>
+            <!--LR2-->
+            <ng-container *ngIf="+numberLR === 2">
+                <div class="gm__navigation-title">
+                    Сurve
+                </div>
+                <mat-form-field>
+                    <mat-label>Parameter A</mat-label>
+                    <input [(ngModel)]="curve.a" (ngModelChange)="changeInput()" matInput name="curve_a" type="number">
+                </mat-form-field>
+                <mat-checkbox [(ngModel)]="curve.display_helpers" (ngModelChange)="changeInput()" class="example-margin" name="display_helpers">Show additional</mat-checkbox>
+                <span></span>
+                <mat-form-field>
+                    <mat-label>Minimum Parameter A</mat-label>
+                    <input [(ngModel)]="curve.a_min" matInput name="curveAnimMin_a" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Maximum Parameter A</mat-label>
+                    <input [(ngModel)]="curve.a_max" matInput name="curveAnimMax_a" type="number">
+                </mat-form-field>
+                <button mat-button (click)="playAnimationParameter()">Play animation</button>
+                <mat-form-field>
+                    <mat-label>Build speed</mat-label>
+                    <input [(ngModel)]="curve.speed_build" matInput name="speedBuild_a" type="number">
+                </mat-form-field>
+                <span></span>
+                <button mat-button (click)="playAnimationBuild()">Play bulid animation</button>
+                <mat-form-field>
+                    <mat-label>Arc Length</mat-label>
+                    <input [(ngModel)]="curve.arc_length" matInput name="arc_length" type="number" readonly>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Square</mat-label>
+                    <input [(ngModel)]="curve.square" matInput name="square" type="number" readonly>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Radius</mat-label>
+                    <input [(ngModel)]="curve.radius" matInput name="radius" type="number" readonly>
+                </mat-form-field>
+                <div class="gm__navigation-title">
+                    Offset
+                </div>
+                <mat-form-field>
+                    <mat-label>X</mat-label>
+                    <input [(ngModel)]="curveOffset.X" (ngModelChange)="changeInput()" matInput name="X_curveOffset" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Y</mat-label>
+                    <input [(ngModel)]="curveOffset.Y" (ngModelChange)="changeInput()" matInput name="Y_curveOffset" type="number">
+                </mat-form-field>
+                <div class="gm__navigation-title">
+                    Rotation
+                </div>
+                <mat-form-field>
+                    <mat-label>X</mat-label>
+                    <input [(ngModel)]="curvePivot.X" (ngModelChange)="changeInput()" matInput name="X_curvePivot" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Y</mat-label>
+                    <input [(ngModel)]="curvePivot.Y" (ngModelChange)="changeInput()" matInput name="Y_curvePivot" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>DEG</mat-label>
+                    <input [(ngModel)]="curvePivot.DEG" (ngModelChange)="changeInput()" matInput name="DEG_curvePivot" type="number">
+                </mat-form-field>
+                <div class="gm__navigation-title">
+                    Tangent and Normal lines
+                </div>
+                <mat-slider class="slider" min="-1000" max="1000" step="1">
+                    <input [(ngModel)]="curveTangentNormal.X" (ngModelChange)="onChangeSlider()" matSliderThumb name="tangent-normal">
+                </mat-slider>
+                <span></span>
+                <mat-checkbox [(ngModel)]="curveTangentNormal.tangent" (ngModelChange)="changeInput()" class="example-margin" name="display_helpers">Tangent</mat-checkbox>
+                <mat-checkbox [(ngModel)]="curveTangentNormal.normal" (ngModelChange)="changeInput()" class="example-margin" name="display_helpers">Normal</mat-checkbox>
+                <mat-checkbox [(ngModel)]="curveTangentNormal.inflections" (ngModelChange)="changeInput()" class="example-margin" name="display_helpers">Inflections</mat-checkbox>
+
+            </ng-container>
+            <ng-container *ngIf="+numberLR === 3">
+                <div class="gm__navigation-title">
+                    Curves
+                </div>
+                <mat-form-field>
+                    <mat-label>Wa</mat-label>
+                    <input [(ngModel)]="curvesSettings.wa" (ngModelChange)="changeInput()" step="0.01" matInput name="wa" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Wc</mat-label>
+                    <input [(ngModel)]="curvesSettings.wc" (ngModelChange)="changeInput()" step="0.01" matInput name="wc" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Wb</mat-label>
+                    <input [(ngModel)]="curvesSettings.wb" (ngModelChange)="changeInput()" step="0.01" matInput name="wb" type="number">
+                </mat-form-field>
+                <mat-checkbox [(ngModel)]="curvesSettings.unite_points" (ngModelChange)="changeInput()" class="example-margin" name="unite_points">Unite Points</mat-checkbox>
+                <mat-checkbox [(ngModel)]="curvesSettings.display_point" (ngModelChange)="changeInput()" class="example-margin" name="display_points">Display points</mat-checkbox>
+                <button mat-button (click)="addCurveLr3()">Add curve</button>
+                <button mat-button (click)="playAnimationLr3()">Play animation</button>
+                <div class="gm__navigation-title">
+                    Offset
+                </div>
+                <mat-form-field>
+                    <mat-label>X</mat-label>
+                    <input [(ngModel)]="curvesOffset.X" (ngModelChange)="changeInput()" matInput name="X_curvesOffset" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Y</mat-label>
+                    <input [(ngModel)]="curvesOffset.Y" (ngModelChange)="changeInput()" matInput name="Y_curvesOffset" type="number">
+                </mat-form-field>
+                <div class="gm__navigation-title">
+                    Rotation
+                </div>
+                <mat-form-field>
+                    <mat-label>X</mat-label>
+                    <input [(ngModel)]="curvesPivot.X" (ngModelChange)="changeInput()" matInput name="X_curvesPivot" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Y</mat-label>
+                    <input [(ngModel)]="curvesPivot.Y" (ngModelChange)="changeInput()" matInput name="Y_curvesPivot" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>DEG</mat-label>
+                    <input [(ngModel)]="curvesPivot.DEG" (ngModelChange)="changeInput()" matInput name="DEG_curvesPivot" type="number">
+                </mat-form-field>
+            </ng-container>
+        </form>
+    </div>
+</div>
