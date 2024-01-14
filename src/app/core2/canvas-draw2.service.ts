@@ -41,7 +41,11 @@ export class CanvasDraw2Service {
 
     isMouseDown = false;
     pickedPoint: any;
+    pickedPointType: any;
     pickedPoints: any[];
+    pickedCurves: any[];
+    distanceToParameters: any[]
+
 
     constructor() {
     }
@@ -186,83 +190,110 @@ export class CanvasDraw2Service {
         }
     }
 
+    getMousePoint(e: any) {
+        const mouseX = e.clientX - this.cvs.getBoundingClientRect().left;
+        const mouseY = this.cvs.width - (e.clientY - this.cvs.getBoundingClientRect().top);
+        const pivot = {
+            ...this.pivot,
+            DEG: -this.pivot.DEG
+        }
+        let point = {x: mouseX, y: mouseY};
+        point.x -= this.offset.X
+        point.y -= this.offset.Y
+        point = this.rotatePoint(point, pivot)
+
+        return point;
+    }
+
     createHandlers() {
+        const countVectorLength = (point_1: any, point_2: any) => {
+            return Math.sqrt(Math.pow(2 * (point_2.x - point_1.x), 2) + Math.pow(2 * (point_2.y - point_1.y), 2));
+        }
+
+        const getNewParameter = (currentParameter: any, point: any, secondParameter: any) => {
+            let t_x = 2*(currentParameter.x - point.x) / countVectorLength(currentParameter, point);
+            let t_y = 2*(currentParameter.y - point.y) / countVectorLength(currentParameter, point);
+
+            secondParameter.x = point.x - (t_x * countVectorLength(point, secondParameter))/2;
+            secondParameter.y = point.y - (t_y * countVectorLength(point, secondParameter))/2;
+
+            return secondParameter;
+        }
 
         this.cvs.addEventListener('mousemove', (e) => {
             if (!this.isMouseDown) {
                 return;
             }
-            const mouseX = e.clientX - this.cvs.getBoundingClientRect().left;
-            const mouseY = this.cvs.width - (e.clientY - this.cvs.getBoundingClientRect().top);
-            const pivot = {
-                ...this.pivot,
-                DEG: -this.pivot.DEG
-            }
-            let point = {x: mouseX, y: mouseY};
-            point.x -= this.offset.X
-            point.y -= this.offset.Y
-            point = this.rotatePoint(point, pivot)
+
+            const point = this.getMousePoint(e)
 
             if (this.pickedPoints) {
-                this.pickedPoints.forEach((p) => {
-                    p.x = point.x;
-                    p.y = point.y;
+                const isNodePoints = this.pickedPoints.every(p => p.node)
+                const isCurvesHaveNodes = this.pickedCurves.every((curve) => {
+                    return curve.start.node && curve.start.smooth || curve.end.node && curve.end.smooth
                 })
-            } else if (this.pickedPoint) {
-                this.pickedPoint.x = point.x;
-                this.pickedPoint.y = point.y;
+
+                if (isNodePoints) {
+                    this.pickedPoints.forEach((p) => {
+                        p.x = point.x;
+                        p.y = point.y;
+                    })
+
+                    const isSmoothPoints = this.pickedPoints.every(p => p.smooth)
+                    if (isSmoothPoints) {
+                        this.pickedCurves.forEach((curve, index) => {
+                            curve.parameter.x = point.x + this.distanceToParameters[index].x;
+                            curve.parameter.y = point.y + this.distanceToParameters[index].y;
+                        })
+                    }
+                } else if (isCurvesHaveNodes && this.pickedPointType === 'parameter') {
+                    this.pickedPoints.forEach((p) => {
+                        p.x = point.x;
+                        p.y = point.y;
+                    })
+
+                    this.pickedCurves.forEach((curve) => {
+                        const nodePoint = curve.start.node && curve.start.smooth ? curve.start : curve.end.node && curve.end.smooth ? curve.end : null;
+
+                        if (nodePoint) {
+                            const secondCurve = this.curves.find((curves) => {
+                                return (this.checkInPoint(curves.start, nodePoint) || this.checkInPoint(curves.end, nodePoint)) && !(curves.parameter.x === this.pickedPoints[0].x && curves.parameter.y === this.pickedPoints[0].y);
+                            });
+
+                            getNewParameter(this.pickedPoints[0], nodePoint, secondCurve!.parameter);
+                        }
+                    })
+                } else  {
+                    this.pickedPoints[0].x = point.x;
+                    this.pickedPoints[0].y = point.y;
+                }
             }
-
-
             this.redrawScene();
         });
 
         this.cvs.addEventListener('mousedown', (e) => {
-            const mouseX = e.clientX - this.cvs.getBoundingClientRect().left;
-            const mouseY = this.cvs.width - (e.clientY - this.cvs.getBoundingClientRect().top);
-
-            const pivot = {
-                ...this.pivot,
-                DEG: -this.pivot.DEG
-            }
-            let point = {x: mouseX, y: mouseY};
-            point.x -= this.offset.X
-            point.y -= this.offset.Y
-            point = this.rotatePoint(point, pivot)
+            const point = this.getMousePoint(e)
 
             const pickedCurves = this.curves.filter((curves) => {
                 return this.checkInPoint(curves.start, point) || this.checkInPoint(curves.end, point) || this.checkInPoint(curves.parameter, point)
             })
 
-            const pickedCurve = this.curves.find((curves) => {
-                return this.checkInPoint(curves.start, point) || this.checkInPoint(curves.end, point) || this.checkInPoint(curves.parameter, point)
-            })
-
-            console.log(pickedCurve);
-            console.log(point)
-
             if (pickedCurves.length) {
+                this.pickedCurves = pickedCurves;
 
-                if (this.curvesSettings.unite_points) {
-                    this.pickedPoints = pickedCurves.map((curve: any) => {
-                        if (this.checkInPoint(curve.start, point)) {
-                            return curve.start;
-                        } else if (this.checkInPoint(curve.end, point)) {
-                            return curve.end;
-                        } else if (this.checkInPoint(curve.parameter, point)) {
-                            return curve.parameter;
-                        }
-                    })
-                } else if (pickedCurve) {
-                    if (this.checkInPoint(pickedCurve.start, point)) {
-                        this.pickedPoint = pickedCurve.start;
-                    } else if (this.checkInPoint(pickedCurve.end, point)) {
-                        this.pickedPoint = pickedCurve.end;
-                    } else if (this.checkInPoint(pickedCurve.parameter, point)) {
-                        this.pickedPoint = pickedCurve.parameter;
+                this.pickedPoints = pickedCurves.map((curve: any) => {
+                    if (this.checkInPoint(curve.start, point)) {
+                        return curve.start;
+                    } else if (this.checkInPoint(curve.end, point)) {
+                        return curve.end;
+                    } else if (this.checkInPoint(curve.parameter, point)) {
+                        this.pickedPointType = 'parameter';
+                        return curve.parameter;
                     }
-                }
+                })
 
+                const isNodeSmoothPoints = this.pickedPoints.every(p => p.node && p.smooth)
+                if (isNodeSmoothPoints) { this.getDistancesToParameters(); }
 
                 this.isMouseDown = true
             }
@@ -271,7 +302,17 @@ export class CanvasDraw2Service {
         this.cvs.addEventListener('mouseup', (e) => {
             this.isMouseDown = false;
             this.pickedPoint = null;
+            this.pickedPointType = undefined;
         });
+    }
+
+    getDistancesToParameters() {
+        this.distanceToParameters = this.pickedCurves.map((curve) => {
+            const x = curve.parameter.x - this.pickedPoints[0].x;
+            const y = curve.parameter.y - this.pickedPoints[0].y;
+
+            return {x, y};
+        })
     }
 
     checkInPoint = (point: any, mousePoint: any) => {
@@ -303,13 +344,13 @@ export class CanvasDraw2Service {
 
     getCurves() {
         return [{
-            "start": {"x": 320.55554962158203, "y": 479.55555725097656},
+            "start": {"x": 320.5, "y": 479.5,  "node": true, "smooth": false},
             "end": {"x": 530.5714302062988, "y": 755.2857055664062},
             "parameter": {"x": 213, "y": 686.875}
         }, {
             "start": {"x": 247, "y": 155.875},
-            "end": {"x": 223.55554962158203, "y": 393.55555725097656},
-            "parameter": {"x": 77.55554962158203, "y": 185.55555725097656}
+            "end": {"x": 222.5, "y": 392.5, "node": true, "smooth": true},
+             "parameter": {"x": 77.55554962158203, "y": 185.55555725097656}
         }, {
             "start": {"x": 621, "y": 794},
             "end": {"x": 564, "y": 767},
@@ -324,7 +365,7 @@ export class CanvasDraw2Service {
             "parameter": {"x": 740, "y": 884.5555572509766}
         }, {
             "start": {"x": 547.5714302062988, "y": 755.2857055664062},
-            "end": {"x": 326, "y": 480.875},
+            "end": {"x": 326, "y": 480.8},
             "parameter": {"x": 241, "y": 669.875}
         }, {
             "start": {"x": 530, "y": 755.3333282470703},
@@ -416,39 +457,39 @@ export class CanvasDraw2Service {
             "parameter": {"x": 368.55554962158203, "y": 309.55555725097656}
         }, {
             "start": {"x": 238.55554962158203, "y": 170.55555725097656},
-            "end": {"x": 238.55554962158203, "y": 392.55555725097656},
+            "end": {"x": 238.55554962158203, "y": 392.55555725097656, "node": true, "smooth": true},
             "parameter": {"x": 101.55554962158203, "y": 197.55555725097656}
         }, {
             "start": {"x": 238.55554962158203, "y": 171.55555725097656},
             "end": {"x": 247.55554962158203, "y": 155.55555725097656},
             "parameter": {"x": 245, "y": 162.55555725097656}
         }, {
-            "start": {"x": 222.55554962158203, "y": 392.55555725097656},
-            "end": {"x": 319.55554962158203, "y": 479.55555725097656},
+            "start": {"x": 222.5, "y": 392.5, "node": true, "smooth": true},
+            "end": {"x": 320.5, "y": 479.5, "node": true, "smooth": false},
             "parameter": {"x": 266.55554962158203, "y": 441.55555725097656}
         }, {
-            "start": {"x": 238.55554962158203, "y": 392.55555725097656},
-            "end": {"x": 326, "y": 480.1999816894531},
+            "start": {"x": 238.55554962158203, "y": 392.55555725097656, "node": true, "smooth": true},
+            "end": {"x": 326, "y": 480.8, "node": true, "smooth": false},
             "parameter": {"x": 259.55554962158203, "y": 420.55555725097656}
         }, {
-            "start": {"x": 418, "y": 250.55555725097656},
+            "start": {"x": 418, "y": 250.55555725097656, "node": true, "smooth": true},
             "end": {"x": 240, "y": 172.55555725097656},
             "parameter": {"x": 345, "y": 167.55555725097656}
         }, {
             "start": {"x": 240, "y": 172.55555725097656},
-            "end": {"x": 412, "y": 259.55555725097656},
+            "end": {"x": 412, "y": 257.5, "node": true, "smooth": true},
             "parameter": {"x": 351, "y": 182.55555725097656}
         }, {
-            "start": {"x": 420, "y": 314.55555725097656},
-            "end": {"x": 417, "y": 249.55555725097656},
+            "start": {"x": 420, "y": 314.55555725097656, "node": true, "smooth": false},
+            "end": {"x": 417, "y": 249.55555725097656, "node": true, "smooth": true},
             "parameter": {"x": 442, "y": 290.55555725097656}
         }, {
             "start": {"x": 408, "y": 305.55555725097656},
-            "end": {"x": 411, "y": 257.55555725097656},
+            "end": {"x": 412, "y": 257.5, "node": true, "smooth": true},
             "parameter": {"x": 435, "y": 298.55555725097656}
         }, {
             "start": {"x": 400, "y": 289.55555725097656},
-            "end": {"x": 422, "y": 314.55555725097656},
+            "end": {"x": 422, "y": 314.55555725097656, "node": true, "smooth": false},
             "parameter": {"x": 402, "y": 309.55555725097656}
         }, {
             "start": {"x": 323, "y": 261.55555725097656},

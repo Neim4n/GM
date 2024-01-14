@@ -2,6 +2,8 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import { CanvasDrawService } from "../../core/canvas-draw.service";
 import { CanvasDraw1Service } from "../../core1/canvas-draw1.service";
 import { CanvasDraw2Service } from "../../core2/canvas-draw2.service";
+import { CanvasDraw3Service } from "../../core3/canvas-draw3.service";
+import { CanvasDraw4Service } from "../../core4/canvas-draw4.service";
 
 @Component({
     selector: 'app-main-page',
@@ -11,7 +13,7 @@ import { CanvasDraw2Service } from "../../core2/canvas-draw2.service";
 export class MainPageComponent implements OnInit, AfterViewInit {
     @ViewChild('canvasElement') canvas: ElementRef;
 
-    numberLR = 3;
+    numberLR = 5;
 
     //LR1
     gridScale = 20
@@ -124,10 +126,48 @@ export class MainPageComponent implements OnInit, AfterViewInit {
         Y: 0,
     }
 
+    //LR5
+    projection = {
+        F: 1,
+        B: 45,
+        A: 30
+    }
+    cube = {
+        X: 100,
+        Y: 100,
+        Z: 100
+    }
+    offsetCube = {
+        x: 0,
+        y: 0,
+        z: 0
+    }
+    rotationCube = {
+        Ox: 0,
+        Oy: 0,
+        Oz: 0
+    }
+    animationCube = {
+        x: 0,
+        y: 0,
+        z: 0,
+        Ox: 0,
+        Oy: 0,
+        Oz: 0
+    }
+
+    //LR7
+    fractal = {
+        scale: 30,
+        iterations: 100000
+    }
+
     constructor(
         private canvasDrawService: CanvasDrawService,
         private canvasDraw1Service: CanvasDraw1Service,
-        private canvasDraw2Service: CanvasDraw2Service
+        private canvasDraw2Service: CanvasDraw2Service,
+        private canvasDraw3Service: CanvasDraw3Service,
+        private canvasDraw4Service: CanvasDraw4Service
     ) {
     }
 
@@ -178,13 +218,19 @@ export class MainPageComponent implements OnInit, AfterViewInit {
             if (status) {
                 this.canvasDraw1Service.createHandlers();
             }
-        } else {
+        } else if (+this.numberLR === 3) {
             this.canvasDraw2Service.setSettings(this.curvesSettings, this.curvesOffset, this.curvesPivot);
             this.canvasDraw2Service.drawScene(cvs, ctx, status);
 
             if (status) {
                 this.canvasDraw2Service.createHandlers();
             }
+        } else if (+this.numberLR === 5) {
+            this.canvasDraw3Service.setSettings(this.projection, this.cube, this.offsetCube, this.rotationCube, this.animationCube);
+            this.canvasDraw3Service.drawScene(cvs, ctx)
+        }  else if (+this.numberLR === 7) {
+            this.canvasDraw4Service.setSettings(this.fractal);
+            this.canvasDraw4Service.drawScene(cvs, ctx)
         }
     }
 
@@ -203,5 +249,24 @@ export class MainPageComponent implements OnInit, AfterViewInit {
 
     playAnimationLr3(){
         this.canvasDraw2Service.playAnimation();
+    }
+
+    playAnimationLr4(){
+        this.offsetCube.x = this.animationCube.x;
+        this.offsetCube.y = this.animationCube.y;
+        this.offsetCube.z = this.animationCube.z;
+
+        this.rotationCube.Ox = this.animationCube.Ox;
+        this.rotationCube.Oy = this.animationCube.Oy;
+        this.rotationCube.Oz = this.animationCube.Oz;
+
+        this.canvasDraw3Service.playAnimation(0);
+    }
+
+    playAnimationLr7(){
+        const cvs = this.canvas.nativeElement;
+        const ctx = cvs.getContext('2d');
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        this.canvasDraw4Service.playAnimation(0);
     }
 }

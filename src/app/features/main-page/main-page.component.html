@@ -10,6 +10,8 @@
                     <option value="1">LR1</option>
                     <option value="2">LR2</option>
                     <option value="3">LR3</option>
+                    <option value="5">LR5</option>
+                    <option value="7">LR7</option>
                 </select>
             </mat-form-field>
             <!--LR1-->
@@ -278,6 +280,112 @@
                     <mat-label>DEG</mat-label>
                     <input [(ngModel)]="curvesPivot.DEG" (ngModelChange)="changeInput()" matInput name="DEG_curvesPivot" type="number">
                 </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="+numberLR === 5">
+                <div class="gm__navigation-title">
+                    Projection
+                </div>
+                <mat-form-field>
+                    <mat-label>F</mat-label>
+                    <input [(ngModel)]="projection.F" (ngModelChange)="changeInput()" step="0.01" matInput name="F" type="number" max="1" min="0.5">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>B</mat-label>
+                    <input [(ngModel)]="projection.B" (ngModelChange)="changeInput()" step="0.01" matInput name="B" type="number" readonly>
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>A</mat-label>
+                    <input [(ngModel)]="projection.A" (ngModelChange)="changeInput()" step="1" matInput name="A" type="number">
+                </mat-form-field>
+
+                <div class="gm__navigation-title">
+                    Figure
+                </div>
+                <mat-form-field>
+                    <mat-label>X</mat-label>
+                    <input [(ngModel)]="cube.X" (ngModelChange)="changeInput()" matInput name="L" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Y</mat-label>
+                    <input [(ngModel)]="cube.Y" (ngModelChange)="changeInput()" matInput name="W" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Z</mat-label>
+                    <input [(ngModel)]="cube.Z" (ngModelChange)="changeInput()" matInput name="H" type="number">
+                </mat-form-field>
+                <div class="gm__navigation-title">
+                    Offset
+                </div>
+                <mat-form-field>
+                    <mat-label>X</mat-label>
+                    <input [(ngModel)]="offsetCube.x" (ngModelChange)="changeInput()" matInput name="X_Offset_cube" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Y</mat-label>
+                    <input [(ngModel)]="offsetCube.y" (ngModelChange)="changeInput()" matInput name="Y_Offset_cube" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Z</mat-label>
+                    <input [(ngModel)]="offsetCube.z" (ngModelChange)="changeInput()" matInput name="DEG_Offset_cube" type="number">
+                </mat-form-field>
+                <div class="gm__navigation-title">
+                    Rotation
+                </div>
+                <mat-form-field>
+                    <mat-label>Ox</mat-label>
+                    <input [(ngModel)]="rotationCube.Ox" (ngModelChange)="changeInput()" matInput name="Ox_rotation_cube" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Oy</mat-label>
+                    <input [(ngModel)]="rotationCube.Oy" (ngModelChange)="changeInput()" matInput name="Oy_rotation_cube" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Oz</mat-label>
+                    <input [(ngModel)]="rotationCube.Oz" (ngModelChange)="changeInput()" matInput name="Oz_rotation_cube" type="number">
+                </mat-form-field>
+                <div class="gm__navigation-title">
+                    Animation
+                </div>
+                <mat-form-field>
+                    <mat-label>Offset X</mat-label>
+                    <input [(ngModel)]="animationCube.x" (ngModelChange)="changeInput()" matInput name="x_offset_anim" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Offset Y</mat-label>
+                    <input [(ngModel)]="animationCube.y" (ngModelChange)="changeInput()" matInput name="y_offset_anim" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Offset Z</mat-label>
+                    <input [(ngModel)]="animationCube.z" (ngModelChange)="changeInput()" matInput name="z_offset_anim" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Rotate X</mat-label>
+                    <input [(ngModel)]="animationCube.Ox" (ngModelChange)="changeInput()" matInput name="x_rotate_anim" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Rotate Y</mat-label>
+                    <input [(ngModel)]="animationCube.Oy" (ngModelChange)="changeInput()" matInput name="y_rotate_anim" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Rotate Z</mat-label>
+                    <input [(ngModel)]="animationCube.Oz" (ngModelChange)="changeInput()" matInput name="z_rotate_anim" type="number">
+                </mat-form-field>
+                <button mat-button (click)="playAnimationLr4()">Play animation</button>
+            </ng-container>
+            <ng-container *ngIf="+numberLR === 7">
+                <div class="gm__navigation-title">
+                    Figure
+                </div>
+                <mat-form-field>
+                    <mat-label>Scale</mat-label>
+                    <input [(ngModel)]="fractal.scale" (ngModelChange)="changeInput()" matInput name="fractal_scale" type="number">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Iterations</mat-label>
+                    <input [(ngModel)]="fractal.iterations" (ngModelChange)="changeInput()" matInput name="fractal_iterations" type="number">
+                </mat-form-field>
+
+                <button mat-button (click)="playAnimationLr7()">Play animation</button>
             </ng-container>
         </form>
     </div>
